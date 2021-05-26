@@ -1,9 +1,9 @@
+import { ActivityIndicator, FlatList, Image, SectionList, StyleSheet, Text, View } from 'react-native'
 import React, { Component } from 'react'
-import { unstable_renderSubtreeIntoContainer } from 'react-dom'
-import { Text, View, Image, StyleSheet, SectionList, FlatList, ActivityIndicator } from 'react-native'
+
+import CoinMarketItem from './CoinMarketItem'
 import Http from 'src/libs/http'
 import colors from 'src/res/colors'
-import CoinMarketItem from './CoinMarketItem'
 
 export default class CoinDetailScreen extends Component {
 
@@ -52,7 +52,7 @@ export default class CoinDetailScreen extends Component {
 
   componentDidMount() {
     const { coin } = this.props.route.params
-    this.props.navigation.setOptions({ title: coin.symbol, headerShown: false })
+    this.props.navigation.setOptions({ title: coin.symbol })
     this.getMarkets(coin.id)
     this.setState({ coin })
   }
@@ -64,19 +64,19 @@ export default class CoinDetailScreen extends Component {
     return (
       <View style={style.container}>
         <View style={style.subHeader}>
-          <Image style={style.coinIcon} source={{ uri: this.getSymbolIcon(coin.name)}} />
+          <Image style={style.coinIcon} source={{ uri: this.getSymbolIcon(coin.name) }} />
           <Text style={style.titleText}>{coin.name}</Text>
         </View>
         <SectionList
           style={style.section}
           sections={this.getSections(coin)}
           keyExtractor={(item) => item}
-          renderSectionHeader={({ section }) => 
+          renderSectionHeader={({ section }) =>
             <View style={style.sectionHeader}>
               <Text style={style.sectionText}>{section.title}</Text>
             </View>
           }
-          renderItem={({ item }) => 
+          renderItem={({ item }) =>
             <View style={style.sectionItem}>
               <Text style={style.itemText}>{item}</Text>
             </View>

@@ -1,9 +1,10 @@
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
 import React, { Component } from "react";
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
-import Http from "src/libs/http"
-import colors from "src/res/colors";
+
 import CoinSearch from "./CoinSearch";
 import CoinsItem from "./CoinsItem";
+import Http from "src/libs/http"
+import colors from "src/res/colors";
 
 class CoinsScreen extends Component {
 
@@ -31,15 +32,14 @@ class CoinsScreen extends Component {
     const { allCoins } = this.state
 
     const coinsFiltered = allCoins.filter(coin => {
-      return coin.name.toLowerCase().includes(query.toLowerCase()) || 
-      coin.symbol.toLowerCase().includes(query.toLowerCase())
+      return coin.name.toLowerCase().includes(query.toLowerCase()) ||
+        coin.symbol.toLowerCase().includes(query.toLowerCase())
     })
 
     this.setState({ coins: coinsFiltered })
   }
 
   render() {
-
     const { coins, loading } = this.state
 
     return (
@@ -56,8 +56,8 @@ class CoinsScreen extends Component {
         <FlatList
           data={coins}
           renderItem={({ item }) =>
-            <CoinsItem 
-              item={item} 
+            <CoinsItem
+              item={item}
               onPress={() => this.handlePress(item)}
             />
           }

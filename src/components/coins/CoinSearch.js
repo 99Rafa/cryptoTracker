@@ -55,5 +55,3 @@ const style = StyleSheet.create({
     borderRadius: 8
   }
 })
-
-rnc
