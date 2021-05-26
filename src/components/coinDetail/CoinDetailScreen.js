@@ -1,4 +1,14 @@
-import { ActivityIndicator, FlatList, Image, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  SectionList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native'
 import React, { Component } from 'react'
 
 import CoinMarketItem from './CoinMarketItem'
@@ -53,19 +63,50 @@ export default class CoinDetailScreen extends Component {
     }
   }
 
-  addFavorite = () => {
+  addFavorite = async () => {
     const coin = JSON.stringify(this.state.coin)
     const key = `favorite-${this.state.coin.id}`
 
-    const stored = Storage.store(key, coin)
+    const stored = await Storage.store(key, coin)
 
     if (stored) {
       this.setState({ isFavorite: true })
     }
   }
 
-  removeFavorite = () => {
+  removeFavorite = async () => {
+    await Alert.alert('Remove favorite', 'Are you sure?', [
+      {
+        text: 'Cancel',
+        onPress: () => { },
+        style: 'cancel'
+      },
+      {
+        text: 'Remove',
+        onPress: async () => {
+          const key = `favorite-${this.state.coin.id}`
+          await Storage.remove(key)
+          this.setState({ isFavorite: false })
+        },
+        style: 'destructive'
+      }
+    ])
 
+  }
+
+  getFavorite = async () => {
+    try {
+      const key = `favorite-${this.state.coin.id}`
+
+      const favStr = await Storage.get(key)
+
+      if (favStr) {
+        this.setState({ isFavorite: true })
+      }
+
+    } catch (error) {
+      console.log('get favorites error', error)
+    }
   }
 
   getMarkets = async id => {
@@ -80,6 +121,9 @@ export default class CoinDetailScreen extends Component {
     this.props.navigation.setOptions({ title: coin.symbol })
     this.getMarkets(coin.id)
     this.setState({ coin })
+    this.setState({ coin }, () => {
+      this.getFavorite()
+    })
   }
 
   render() {
