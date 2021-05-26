@@ -1,8 +1,9 @@
-import { ActivityIndicator, FlatList, Image, SectionList, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, Image, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { Component } from 'react'
 
 import CoinMarketItem from './CoinMarketItem'
 import Http from 'src/libs/http'
+import Storage from 'src/libs/storage'
 import colors from 'src/res/colors'
 
 export default class CoinDetailScreen extends Component {
@@ -11,6 +12,7 @@ export default class CoinDetailScreen extends Component {
     loadingMarkets: false,
     coin: {},
     markets: [],
+    isFavorite: false,
   }
 
   getSymbolIcon = name => {
@@ -43,6 +45,29 @@ export default class CoinDetailScreen extends Component {
     return sections
   }
 
+  toggleFavorite = () => {
+    if (this.state.isFavorite) {
+      this.removeFavorite()
+    } else {
+      this.addFavorite()
+    }
+  }
+
+  addFavorite = () => {
+    const coin = JSON.stringify(this.state.coin)
+    const key = `favorite-${this.state.coin.id}`
+
+    const stored = Storage.store(key, coin)
+
+    if (stored) {
+      this.setState({ isFavorite: true })
+    }
+  }
+
+  removeFavorite = () => {
+
+  }
+
   getMarkets = async id => {
     this.setState({ loadingMarkets: true })
     const url = `https://api.coinlore.net/api/coin/markets/?id=${id}`
@@ -59,40 +84,56 @@ export default class CoinDetailScreen extends Component {
 
   render() {
 
-    const { coin, markets, loadingMarkets } = this.state
+    const { coin, markets, loadingMarkets, isFavorite } = this.state
 
     return (
-      <View style={style.container}>
-        <View style={style.subHeader}>
-          <Image style={style.coinIcon} source={{ uri: this.getSymbolIcon(coin.name) }} />
-          <Text style={style.titleText}>{coin.name}</Text>
+      <View style={styles.container}>
+        <View style={styles.subHeader}>
+          <View style={styles.row}>
+            <Image style={styles.coinIcon} source={{ uri: this.getSymbolIcon(coin.name) }} />
+            <Text style={styles.titleText}>{coin.name}</Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={this.toggleFavorite}
+            style={[
+              styles.btnFavorite,
+              isFavorite ? styles.btnFavoriteRemove : styles.btnFavoriteAdd
+            ]}>
+            <Text style={styles.btnFavoriteText}>
+              {isFavorite ? 'Remove favorite' : 'Add to favorites'}
+            </Text>
+          </TouchableOpacity>
+
         </View>
+
+
         <SectionList
-          style={style.section}
+          style={styles.section}
           sections={this.getSections(coin)}
           keyExtractor={(item) => item}
           renderSectionHeader={({ section }) =>
-            <View style={style.sectionHeader}>
-              <Text style={style.sectionText}>{section.title}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionText}>{section.title}</Text>
             </View>
           }
           renderItem={({ item }) =>
-            <View style={style.sectionItem}>
-              <Text style={style.itemText}>{item}</Text>
+            <View style={styles.sectionItem}>
+              <Text style={styles.itemText}>{item}</Text>
             </View>
           }
         />
-        <Text style={style.marketTitle}>Markets</Text>
+        <Text style={styles.marketTitle}>Markets</Text>
         {
           loadingMarkets
             ? <ActivityIndicator
-              style={style.loader}
-              color="#fff"
+              style={styles.loader}
+              color={colors.white}
               size='large' />
             : null
         }
         <FlatList
-          style={style.list}
+          style={styles.list}
           horizontal={true}
           data={markets}
           keyExtractor={(item) => `${item.base}-${item.name}-${item.quote}`}
@@ -103,7 +144,7 @@ export default class CoinDetailScreen extends Component {
   }
 }
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.charade
@@ -112,12 +153,16 @@ const style = StyleSheet.create({
     backgroundColor: "rgba(0,0,0, 0.1)",
     padding: 16,
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: 'space-between'
+  },
+  row: {
+    flexDirection: 'row'
   },
   titleText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
+    color: colors.white,
     marginLeft: 8
   },
   coinIcon: {
@@ -132,11 +177,11 @@ const style = StyleSheet.create({
     padding: 8
   },
   itemText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 14
   },
   sectionText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 14,
     fontWeight: "bold"
   },
@@ -148,12 +193,25 @@ const style = StyleSheet.create({
     paddingLeft: 10,
   },
   marketTitle: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 16,
     marginBottom: 16,
     paddingLeft: 16
   },
   loader: {
     marginTop: 60,
+  },
+  btnFavorite: {
+    padding: 8,
+    borderRadius: 8
+  },
+  btnFavoriteText: {
+    color: colors.white
+  },
+  btnFavoriteAdd: {
+    backgroundColor: colors.picton
+  },
+  btnFavoriteRemove: {
+    backgroundColor: colors.carmine
   }
 })
